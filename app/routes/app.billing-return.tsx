@@ -10,7 +10,6 @@ import {
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
-import { PLANS } from "../config/plans";
 import { updateShopPlan } from "../utils/planUtils";
 
 interface ActiveSubscription {
@@ -56,20 +55,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
             data?.data?.currentAppInstallation?.activeSubscriptions ?? [];
 
         const activeSub = activeSubscriptions.find(
-            (sub) =>
-                sub.status === "ACTIVE" &&
-                Object.keys(PLANS).includes(sub.name.toLowerCase())
+            (sub) => sub.status === "ACTIVE" || sub.status === "PENDING"
         );
 
         if (activeSub) {
-            const planKey = activeSub.name.toLowerCase();
-            const planMeta = PLANS[planKey];
+            const planKey = activeSub.name.toLowerCase().includes("pro") ? "pro" : "free";
+            const label = planKey === "pro" ? "Pro Plan" : "Basic Plan";
 
             await updateShopPlan(shop, planKey, activeSub.id);
 
             return {
                 ok: true,
-                plan: { key: planKey, label: planMeta?.label ?? planKey },
+                plan: { key: planKey, label },
             } satisfies LoaderData;
         }
 
@@ -87,20 +84,19 @@ export default function BillingReturnPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const timer = setTimeout(() => navigate("/app/billing"), 5000);
+        const timer = setTimeout(() => navigate(ok ? "/app" : "/app/billing"), 5000);
         return () => clearTimeout(timer);
-    }, [navigate]);
+    }, [navigate, ok]);
 
     return (
         <Page>
             <TitleBar title="Billing" />
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: "24px" }}>
                 <BlockStack gap="400" inlineAlign="center">
-
                     {ok && plan ? (
                         <Banner tone="success" title="Plan activated successfully!">
                             <Text as="p">
-                                You are now on the <strong>{plan.label}</strong> plan. Redirecting you back to billing…
+                                You are now on the <strong>{plan.label}</strong> plan. Redirecting you to dashboard…
                             </Text>
                         </Banner>
                     ) : (
@@ -116,7 +112,6 @@ export default function BillingReturnPage() {
                     <Text tone="subdued" variant="bodySm" as="p">
                         Redirecting in 5 seconds…
                     </Text>
-
                 </BlockStack>
             </div>
         </Page>

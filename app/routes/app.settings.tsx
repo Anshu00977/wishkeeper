@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, useSubmit, useNavigation } from "@remix-run/react";
+import { useLoaderData, useSubmit, useNavigation, useNavigate } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -17,6 +17,8 @@ import {
   Banner,
   Divider,
   Box,
+  Modal,
+  TextContainer,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
@@ -25,12 +27,15 @@ import {
   getStoreSettings,
   updateStoreSettings,
 } from "../services/wishlist.server";
+import { getActiveSubscription } from "../services/billing.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
   const store = await findOrCreateStore(session.shop);
   const settings = await getStoreSettings(store.id);
-  return json({ shop: session.shop, settings, storeId: store.id });
+  const subscription = await getActiveSubscription(admin);
+  const hasActivePlan = !!subscription;
+  return json({ shop: session.shop, settings, storeId: store.id, hasActivePlan });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -57,10 +62,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Settings() {
-  const { settings } = useLoaderData<typeof loader>();
+  const { settings, hasActivePlan } = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const navigation = useNavigation();
+  const navigate = useNavigate();
   const isSaving = navigation.state === "submitting";
+  const [modalOpen, setModalOpen] = useState(!hasActivePlan);
 
   const [form, setForm] = useState({
     showTitle: settings?.showTitle ?? true,
@@ -87,6 +94,26 @@ export default function Settings() {
   return (
     <Page>
       <TitleBar title="Wishlist Settings" />
+
+      <Modal
+        open={modalOpen}
+        onClose={() => { }}
+        title="Subscribe to continue"
+        primaryAction={{
+          content: "View Plans",
+          onAction: () => navigate("/app/billing"),
+        }}
+        noScroll
+      >
+        <Modal.Section>
+          <TextContainer>
+            <Text as="p" variant="bodyMd">
+              You need an active plan to use WishKeeper. Choose a plan to get started.
+            </Text>
+          </TextContainer>
+        </Modal.Section>
+      </Modal>
+
       <BlockStack gap="500">
         {navigation.state === "idle" &&
           navigation.formData !== undefined && (
@@ -111,16 +138,6 @@ export default function Settings() {
                   checked={form.showPrice}
                   onChange={(v) => setForm({ ...form, showPrice: v })}
                 />
-                {/* <Checkbox
-                  label="Show Add to Cart button"
-                  checked={form.showAddToCart}
-                  onChange={(v) => setForm({ ...form, showAddToCart: v })}
-                /> */}
-                {/* <Checkbox
-                  label="Show product vendor"
-                  checked={form.showVendor}
-                  onChange={(v) => setForm({ ...form, showVendor: v })}
-                /> */}
                 <Checkbox
                   label="Show item count"
                   checked={form.showItemCount}

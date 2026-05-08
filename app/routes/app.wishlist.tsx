@@ -1,31 +1,58 @@
+import { useState } from "react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import {
   Page, Layout, Card, Text, BlockStack, InlineStack, Badge,
-  IndexTable, Pagination, EmptyState, Box,
+  IndexTable, Pagination, EmptyState, Box, Modal, TextContainer,
 } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import { findOrCreateStore, getAllWishlists } from "../services/wishlist.server";
+import { getActiveSubscription } from "../services/billing.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
   const store = await findOrCreateStore(session.shop);
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1", 10);
   const data = await getAllWishlists(store.id, page, 20);
-  return json({ ...data, shop: session.shop });
+  const subscription = await getActiveSubscription(admin);
+  const hasActivePlan = !!subscription;
+  return json({ ...data, shop: session.shop, hasActivePlan });
 };
 
 export default function WishlistAdmin() {
-  const { wishlists, total, page, totalPages } = useLoaderData<typeof loader>();
+  const { wishlists, total, page, totalPages, hasActivePlan } = useLoaderData<typeof loader>();
   const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(!hasActivePlan);
+
+  const billingModal = (
+    <Modal
+      open={modalOpen}
+      onClose={() => { }}
+      title="Subscribe to continue"
+      primaryAction={{
+        content: "View Plans",
+        onAction: () => navigate("/app/billing"),
+      }}
+      noScroll
+    >
+      <Modal.Section>
+        <TextContainer>
+          <Text as="p" variant="bodyMd">
+            You need an active plan to use WishKeeper. Choose a plan to get started.
+          </Text>
+        </TextContainer>
+      </Modal.Section>
+    </Modal>
+  );
 
   if (wishlists.length === 0 && page === 1) {
     return (
       <Page>
         <TitleBar title="Wishlists" />
+        {billingModal}
         <Card>
           <EmptyState heading="No wishlists yet" image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png">
             <p>Wishlists will appear here once customers start saving products.</p>
@@ -61,6 +88,7 @@ export default function WishlistAdmin() {
   return (
     <Page>
       <TitleBar title="Wishlists" />
+      {billingModal}
       <Layout>
         <Layout.Section>
           <Card padding="0">

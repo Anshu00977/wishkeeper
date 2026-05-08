@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, useSubmit, useNavigation, useActionData } from "@remix-run/react";
+import { useLoaderData, useSubmit, useNavigation, useActionData, useNavigate } from "@remix-run/react";
 import {
     Page,
     Layout,
@@ -64,22 +64,21 @@ export default function BillingPage() {
     const { subscription, activePlanKey, plans } = useLoaderData<typeof loader>();
     const actionData = useActionData<{ confirmationUrl?: string; success?: boolean }>();
     const submit = useSubmit();
+    const navigate = useNavigate();
     const navigation = useNavigation();
     const isLoading = navigation.state !== "idle";
 
-    // Break out of the Shopify iframe to handle billing redirect
     useEffect(() => {
         if (actionData?.confirmationUrl) {
             window.open(actionData.confirmationUrl, "_top");
         }
     }, [actionData]);
 
-    // Reload page after cancel
     useEffect(() => {
         if (actionData?.success) {
-            window.location.reload();
+            navigate("/app/billing");
         }
-    }, [actionData]);
+    }, [actionData, navigate]);
 
     const handleSubscribe = useCallback(
         (planKey: PlanKey) => {
@@ -102,7 +101,7 @@ export default function BillingPage() {
             <TitleBar title="Billing & Plans" />
             <BlockStack gap="500">
                 {subscription && (
-                    <Banner title={`You're on the ${activePlanKey.toUpperCase()} plan`} tone="success">
+                    <Banner title={`You're on the ${activePlanKey?.toUpperCase()} plan`} tone="success">
                         <Text as="p" variant="bodyMd">
                             Next billing date:{" "}
                             {subscription.currentPeriodEnd
@@ -179,7 +178,7 @@ export default function BillingPage() {
                                                     loading={isCurrentlyLoading}
                                                     disabled={isLoading}
                                                 >
-                                                    {planKey === "pro" ? "Upgrade to Pro" : "Switch to Free"}
+                                                    {planKey === "pro" ? "Upgrade to Pro" : "Get Basic Plan"}
                                                 </Button>
                                             )}
                                         </Box>

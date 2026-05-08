@@ -211,3 +211,8 @@ export async function getAllWishlists(storeId: string, page = 1, limit = 20) {
   ]);
   return { wishlists, total, page, totalPages: Math.ceil(total / limit) };
 }
+export async function getWishlistItemCount(wishlistId: string): Promise<number> {
+  return await prisma.wishlistItem.count({
+    where: { wishlistId },
+  });
+}

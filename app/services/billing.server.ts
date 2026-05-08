@@ -4,7 +4,7 @@ export const PLANS = {
     free: {
         name: "free",
         displayName: "Basic Plan",
-        price: 10,
+        price: 9.99,
         interval: "EVERY_30_DAYS" as const,
         trialDays: 0,
         features: [
@@ -17,7 +17,7 @@ export const PLANS = {
     pro: {
         name: "pro",
         displayName: "Pro Plan",
-        price: 15,
+        price: 14.99,
         interval: "EVERY_30_DAYS" as const,
         trialDays: 0,
         features: [
@@ -95,8 +95,8 @@ export async function getActiveSubscription(admin: AdminApiContext) {
 
 export function getActivePlanKey(
     subscription: Awaited<ReturnType<typeof getActiveSubscription>>
-): PlanKey {
-    if (!subscription) return "free";
+): PlanKey | null {
+    if (!subscription) return null;
     const name = subscription.name?.toLowerCase() ?? "";
     if (name.includes("pro")) return "pro";
     return "free";
@@ -106,7 +106,7 @@ export async function createSubscription(
     admin: AdminApiContext,
     planKey: PlanKey,
     shop: string,
-    returnPath = "/app/billing/callback"
+    returnPath = "/app/billing-return"
 ) {
     const plan = PLANS[planKey];
     const returnUrl = `https://${shop}/admin/apps/${process.env.SHOPIFY_API_KEY}${returnPath}`;
