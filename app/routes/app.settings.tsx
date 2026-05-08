@@ -111,16 +111,16 @@ export default function Settings() {
                   checked={form.showPrice}
                   onChange={(v) => setForm({ ...form, showPrice: v })}
                 />
-                <Checkbox
+                {/* <Checkbox
                   label="Show Add to Cart button"
                   checked={form.showAddToCart}
                   onChange={(v) => setForm({ ...form, showAddToCart: v })}
-                />
-                <Checkbox
+                /> */}
+                {/* <Checkbox
                   label="Show product vendor"
                   checked={form.showVendor}
                   onChange={(v) => setForm({ ...form, showVendor: v })}
-                />
+                /> */}
                 <Checkbox
                   label="Show item count"
                   checked={form.showItemCount}

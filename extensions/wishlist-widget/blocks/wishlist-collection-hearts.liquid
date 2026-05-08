@@ -8,11 +8,12 @@
 {% if block.settings.enabled %}
 
 <style>
-  .wl-heart-wrap {
+   .wl-heart-wrap {
     position: absolute;
     top: 8px;
     right: 8px;
-    z-index: 10;
+    z-index: 100;
+    pointer-events: auto;
   }
   .wl-heart-btn {
     width: {{ block.settings.icon_size }}px;
@@ -28,6 +29,10 @@
     transition: all 0.2s ease;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     padding: 0;
+    pointer-events: auto;
+    position: relative;
+    z-index: 100;
+    -webkit-tap-highlight-color: transparent;
   }
   .wl-heart-btn:hover {
     background: #fff;
@@ -40,6 +45,7 @@
     color: #9ca3af;
     transition: all 0.2s ease;
     stroke-width: 2;
+    pointer-events: none;
   }
   .wl-heart-btn.active svg {
     color: {{ block.settings.active_color }};
@@ -180,20 +186,36 @@
 
     var btn = document.createElement("button");
     btn.className = "wl-heart-btn" + (isActive ? " active" : "");
+    btn.type = "button";
     btn.setAttribute("aria-label", isActive ? "Remove from wishlist" : "Add to wishlist");
     btn.setAttribute("data-wl-product", productId);
-    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><' + iconTag + ' ' + iconAttr + '="' + iconPath + '"/></svg>';
+    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none"><' + iconTag + ' ' + iconAttr + '="' + iconPath + '"/></svg>';
 
-    btn.addEventListener("click", function(e) {
+    function stop(e) {
       e.preventDefault();
       e.stopPropagation();
+      // e.stopImmediatePropagation();
+    }
+
+    btn.addEventListener("click", function(e) {
+      stop(e);
       toggleWishlist(btn, productId);
-    });
+    }, true);
+    btn.addEventListener("mousedown", stop, true);
+    btn.addEventListener("mouseup", stop, true);
+    btn.addEventListener("touchstart", stop, { passive: false, capture: true });
+    btn.addEventListener("touchend", function(e) {
+      stop(e);
+      toggleWishlist(btn, productId);
+    }, { passive: false, capture: true });
+
+    wrap.addEventListener("click", stop, false);
+    wrap.addEventListener("mousedown", stop, false);
+    wrap.addEventListener("touchstart", stop, { passive: false, capture: false });
 
     wrap.appendChild(btn);
     return wrap;
   }
-
   // ─── Toggle wishlist ──────────────────────────────────────────────
 
   function toggleWishlist(btn, productId) {
@@ -322,6 +344,66 @@
   if (productGrid) {
     observer.observe(productGrid, { childList: true, subtree: true });
   }
+
+// ─── Remove from wishlist when added to cart ──────────────────────
+
+ function removeFromWishlistOnCart(productId) {
+    console.log("wishlistedIds:", Array.from(wishlistedIds));
+    console.log("checking productId:", productId);
+    
+    // Always call API directly, don't rely on cache
+    fetch(PROXY + "/api/wishlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        shop: SHOP,
+        customerId: CUSTOMER_ID,
+        productId: productId,
+        action: "remove"
+      })
+    }).then(function() {
+      wishlistedIds.delete(productId);
+      syncButtons(productId, false);
+      updateHeaderBadge();
+    }).catch(function() {});
+  }
+
+  // Intercept fetch (AJAX add to cart)
+  var originalFetch = window.fetch;
+  window.fetch = function(url, options) {
+    if (url && (url.toString().includes("/cart/add.js") || url.toString().includes("/cart/add"))) {
+      try {
+        var body = JSON.parse(options && options.body);
+        var variantId = body.id || body.items?.[0]?.id;
+        if (variantId) {
+          fetch("/variants/" + variantId + ".json")
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              var pid = data?.product_variant?.product_id ? String(data.product_variant.product_id) : null;
+console.log("Variant data:", data);
+console.log("Product ID:", pid);
+if (pid) removeFromWishlistOnCart(pid);
+            });
+        }
+      } catch(e) {}
+    }
+    return originalFetch.apply(this, arguments);
+  };
+
+  // Intercept form submit (standard add to cart)
+  document.addEventListener("submit", function(e) {
+    var form = e.target;
+    if (!form || !form.action || !form.action.includes("/cart/add")) return;
+    var variantInput = form.querySelector('[name="id"]');
+    if (!variantInput) return;
+    fetch("/variants/" + variantInput.value + ".json")
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var pid = String(data?.variant?.product_id);
+        if (pid) removeFromWishlistOnCart(pid);
+      });
+  }, true);
+
 })();
 </script>
 
