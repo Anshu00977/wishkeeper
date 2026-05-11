@@ -4,6 +4,14 @@
   Works for both logged-in customers and guests.
 {% endcomment %}
 
+{{ 'wishlist-button.css' | asset_url | stylesheet_tag }}
+
+<style>
+  .wl-btn-wrapper {
+    --wl-active: {{ block.settings.active_color }};
+  }
+</style>
+
 <div
   id="wishlist-btn-wrapper-{{ product.id }}"
   class="wl-btn-wrapper"
@@ -30,246 +38,19 @@
 </div>
 
 <!-- Upgrade Modal -->
-<div id="wl-upgrade-modal" style="display:none; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center;">
-  <div style="position:absolute; inset:0; background:rgba(0,0,0,0.5);" id="wl-upgrade-overlay"></div>
-  <div style="position:relative; background:#fff; border-radius:12px; padding:32px; max-width:420px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2); text-align:center;">
-    <div style="font-size:40px; margin-bottom:12px;">💛</div>
-    <h2 style="font-size:20px; font-weight:700; margin:0 0 8px; color:#111;">Wishlist Limit Reached</h2>
-    <p style="font-size:14px; color:#6b7280; margin:0 0 8px;">
-      You've reached the <strong id="wl-limit-count">10</strong> item limit on your current plan.
+<div id="wl-upgrade-modal">
+  <div id="wl-upgrade-overlay"></div>
+  <div id="wl-upgrade-box">
+    <button id="wl-upgrade-close">✕</button>
+    <div id="wl-upgrade-emoji">💛</div>
+    <h2 id="wl-upgrade-title">Wishlist Limit Reached</h2>
+    <p id="wl-upgrade-message">
+      Your plan can keep only <strong id="wl-limit-count">200</strong> products in the wishlist. Please coordinate with the store owner for any help.
     </p>
-    <p style="font-size:14px; color:#6b7280; margin:0 0 24px;">
-      Upgrade to <strong>Pro</strong> for <strong>unlimited</strong> wishlist items.
-    </p>
-    
-      <div></div>
   </div>
 </div>
 
-<style>
-  .wl-btn-wrapper {
-    --wl-active: {{ block.settings.active_color }};
-  }
-
-  .wl-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-    position: relative;
-  }
-
-  /* ─── Full button style ─── */
-  .wl-btn--full {
-    padding: 11px 24px;
-    border: 1.5px solid #d1d5db;
-    border-radius: 8px;
-    color: #374151;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    width: 100%;
-  }
-  .wl-btn--full:hover {
-    border-color: var(--wl-active);
-    color: var(--wl-active);
-  }
-  .wl-btn--full.active {
-    background: color-mix(in srgb, var(--wl-active) 8%, transparent);
-    border-color: var(--wl-active);
-    color: var(--wl-active);
-  }
-
-  /* ─── Icon only style ─── */
-  .wl-btn--icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    color: #9ca3af;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-  }
-  .wl-btn--icon:hover {
-    color: var(--wl-active);
-    border-color: var(--wl-active);
-    background: color-mix(in srgb, var(--wl-active) 6%, white);
-  }
-  .wl-btn--icon.active {
-    color: var(--wl-active);
-    background: color-mix(in srgb, var(--wl-active) 10%, white);
-    border-color: var(--wl-active);
-  }
-
-  /* ─── Shared ─── */
-  .wl-btn.active .wl-btn-svg {
-    fill: var(--wl-active);
-    stroke: var(--wl-active);
-  }
-
-  .wl-btn.loading {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  .wl-btn-svg {
-    transition: fill 0.2s, stroke 0.2s, transform 0.2s;
-    flex-shrink: 0;
-  }
-
-  .wl-btn.active .wl-btn-svg {
-    animation: wl-pop 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @keyframes wl-pop {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.3); }
-    100% { transform: scale(1); }
-  }
-
-  #wl-upgrade-modal.open {
-    display: flex !important;
-  }
-</style>
-
-<script>
-  (function() {
-    // ─── Upgrade Modal ───────────────────────────────────────────────
-    var upgradeModal = document.getElementById("wl-upgrade-modal");
-    var upgradeOverlay = document.getElementById("wl-upgrade-overlay");
-    var upgradeCancel = document.getElementById("wl-upgrade-cancel");
-    var upgradeLimitCount = document.getElementById("wl-limit-count");
-
-    function showUpgradeModal(limit) {
-      if (upgradeLimitCount) upgradeLimitCount.textContent = limit;
-      upgradeModal.classList.add("open");
-    }
-
-    function hideUpgradeModal() {
-      upgradeModal.classList.remove("open");
-    }
-
-    if (upgradeOverlay) upgradeOverlay.addEventListener("click", hideUpgradeModal);
-    if (upgradeCancel) upgradeCancel.addEventListener("click", hideUpgradeModal);
-
-    // ─── Wishlist Buttons ────────────────────────────────────────────
-    var wrappers = document.querySelectorAll(".wl-btn-wrapper");
-
-    wrappers.forEach(function(wrapper) {
-      if (wrapper.dataset.initialized) return;
-      wrapper.dataset.initialized = "true";
-
-      var btn = wrapper.querySelector(".wl-btn");
-      var textEl = wrapper.querySelector(".wl-btn-text");
-      var productId = wrapper.dataset.productId;
-      var variantId = wrapper.dataset.variantId;
-      var shop = wrapper.dataset.shop;
-      var proxyUrl = wrapper.dataset.proxyUrl;
-      var customerId = wrapper.dataset.customerId;
-      var isGuest = false;
-      var isActive = false;
-      var currentWishlistId = null;
-
-      var GUEST_KEY = "wishlist_guest_id";
-
-      function getGuestId() {
-        var id = localStorage.getItem(GUEST_KEY);
-        if (!id) {
-          id = "guest_" + crypto.randomUUID();
-          localStorage.setItem(GUEST_KEY, id);
-        }
-        return id;
-      }
-
-      if (!customerId) {
-        customerId = getGuestId();
-        isGuest = true;
-      } else {
-        var guestId = localStorage.getItem(GUEST_KEY);
-        if (guestId) {
-          fetch(proxyUrl + "/api/wishlist", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ shop: shop, customerId: customerId, guestId: guestId, action: "merge" })
-          }).then(function() { localStorage.removeItem(GUEST_KEY); });
-        }
-      }
-
-      function setActive(active) {
-        isActive = active;
-        btn.classList.toggle("active", active);
-        if (textEl) textEl.textContent = active ? "In Wishlist" : "Add to Wishlist";
-        btn.setAttribute("aria-label", active ? "Remove from wishlist" : "Add to wishlist");
-      }
-
-      // Fetch wishlist to get wishlistId and check state
-      fetch(proxyUrl + "/api/wishlist?shop=" + encodeURIComponent(shop) + "&customerId=" + encodeURIComponent(customerId))
-        .then(function(r) { return r.json(); })
-       .then(function(data) {
-  if (data.wishlist && data.wishlist.id) {
-    currentWishlistId = data.wishlist.id;
-  }
-  var found = data.wishlist && data.wishlist.items && data.wishlist.items.some(function(item) {
-    return String(item.productId) === String(productId);
-  });
-  if (found) setActive(true);
-})
-        .catch(function() {});
-
-      btn.addEventListener("click", function() {
-        btn.classList.add("loading");
-        var action = isActive ? "remove" : "add";
-        setActive(!isActive);
-
-        fetch(proxyUrl + "/api/wishlist", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            shop: shop,
-            customerId: customerId,
-            productId: productId,
-            variantId: variantId,
-            wishlistId: currentWishlistId,
-            action: action
-          })
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data.error === "limit_reached") {
-            // Revert button state
-            setActive(false);
-            // Show upgrade modal
-            showUpgradeModal(data.limit);
-            return;
-          }
-
-          if (data.success) {
-            // Update wishlistId if we got it back
-            if (data.item && data.item.wishlistId) {
-              currentWishlistId = data.item.wishlistId;
-            }
-            // Update header badge count
-            var badge = document.getElementById("wl-header-badge");
-            if (badge) {
-              var current = parseInt(badge.textContent) || 0;
-              var newCount = action === "add" ? current + 1 : Math.max(0, current - 1);
-              badge.textContent = newCount;
-              badge.style.display = newCount > 0 ? "block" : "none";
-            }
-          } else {
-            setActive(isActive);
-          }
-        })
-        .catch(function() { setActive(isActive); })
-        .finally(function() { btn.classList.remove("loading"); });
-      });
-    });
-  })();
-</script>
+<script src="{{ 'wishlist-button.js' | asset_url }}" defer></script>
 
 {% schema %}
 {

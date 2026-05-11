@@ -1,32 +1,33 @@
 import type { AdminApiContext } from "@shopify/shopify-app-remix/server";
 
 export const PLANS = {
-    free: {
-        name: "free",
-        displayName: "Basic Plan",
-        price: 9.99,
-        interval: "EVERY_30_DAYS" as const,
-        trialDays: 0,
-        features: [
-            "Save up to 10 wishlist items",
-            "Simple wishlist management",
-            "Mobile friendly",
-            "Fast access",
-        ],
-    },
-    pro: {
-        name: "pro",
-        displayName: "Pro Plan",
-        price: 14.99,
-        interval: "EVERY_30_DAYS" as const,
-        trialDays: 0,
-        features: [
-            "Save up to Infinity wishlist items",
-            "Simple wishlist management",
-            "Mobile friendly",
-            "Fast access",
-        ],
-    },
+  basic
+    : {
+    name: "basic",
+    displayName: "Basic Plan",
+    price: 9.99,
+    interval: "EVERY_30_DAYS" as const,
+    trialDays: 0,
+    features: [
+      "Save up to 200 wishlist items",
+      "Simple wishlist management",
+      "Mobile friendly",
+      "Fast access",
+    ],
+  },
+  pro: {
+    name: "pro",
+    displayName: "Pro Plan",
+    price: 14.99,
+    interval: "EVERY_30_DAYS" as const,
+    trialDays: 0,
+    features: [
+      "Save up to Infinity wishlist items",
+      "Simple wishlist management",
+      "Mobile friendly",
+      "Fast access",
+    ],
+  },
 } as const;
 
 export type PlanKey = keyof typeof PLANS;
@@ -87,70 +88,70 @@ const SUBSCRIPTION_CANCEL = `
 `;
 
 export async function getActiveSubscription(admin: AdminApiContext) {
-    const response = await admin.graphql(ACTIVE_SUBSCRIPTION_QUERY);
-    const data = await response.json();
-    const subs = data?.data?.currentAppInstallation?.activeSubscriptions ?? [];
-    return subs[0] ?? null;
+  const response = await admin.graphql(ACTIVE_SUBSCRIPTION_QUERY);
+  const data = await response.json();
+  const subs = data?.data?.currentAppInstallation?.activeSubscriptions ?? [];
+  return subs[0] ?? null;
 }
 
 export function getActivePlanKey(
-    subscription: Awaited<ReturnType<typeof getActiveSubscription>>
+  subscription: Awaited<ReturnType<typeof getActiveSubscription>>
 ): PlanKey | null {
-    if (!subscription) return null;
-    const name = subscription.name?.toLowerCase() ?? "";
-    if (name.includes("pro")) return "pro";
-    return "free";
+  if (!subscription) return null;
+  const name = subscription.name?.toLowerCase() ?? "";
+  if (name.includes("pro")) return "pro";
+  return "basic";
 }
 
 export async function createSubscription(
-    admin: AdminApiContext,
-    planKey: PlanKey,
-    shop: string,
-    returnPath = "/app/billing-return"
+  admin: AdminApiContext,
+  planKey: PlanKey,
+  shop: string,
+  returnPath = "/app/billing-return"
 ) {
-    const plan = PLANS[planKey];
-    const returnUrl = `https://${shop}/admin/apps/${process.env.SHOPIFY_API_KEY}${returnPath}`;
+  const plan = PLANS[planKey];
+  const returnUrl = `https://${shop}/admin/apps/${process.env.SHOPIFY_API_KEY}${returnPath}`;
 
-    const response = await admin.graphql(SUBSCRIPTION_CREATE, {
-        variables: {
-            name: plan.name,
-            returnUrl,
-            trialDays: plan.trialDays > 0 ? plan.trialDays : undefined,
-            test: true,
-            lineItems: [
-                {
-                    plan: {
-                        appRecurringPricingDetails: {
-                            price: { amount: plan.price, currencyCode: "USD" },
-                            interval: plan.interval,
-                        },
-                    },
-                },
-            ],
+  const response = await admin.graphql(SUBSCRIPTION_CREATE, {
+    variables: {
+      name: plan.name,
+      returnUrl,
+      trialDays: plan.trialDays > 0 ? plan.trialDays : undefined,
+      test: true,
+      lineItems: [
+        {
+          plan: {
+            appRecurringPricingDetails: {
+              price: { amount: plan.price, currencyCode: "USD" },
+              interval: plan.interval,
+            },
+          },
         },
-    });
+      ],
+    },
+  });
 
-    const data = await response.json();
-    const result = data?.data?.appSubscriptionCreate;
+  const data = await response.json();
+  const result = data?.data?.appSubscriptionCreate;
 
-    if (result?.userErrors?.length) {
-        throw new Error(result.userErrors[0].message);
-    }
+  if (result?.userErrors?.length) {
+    throw new Error(result.userErrors[0].message);
+  }
 
-    return result?.confirmationUrl as string;
+  return result?.confirmationUrl as string;
 }
 
 export async function cancelSubscription(
-    admin: AdminApiContext,
-    subscriptionId: string
+  admin: AdminApiContext,
+  subscriptionId: string
 ) {
-    const response = await admin.graphql(SUBSCRIPTION_CANCEL, {
-        variables: { id: subscriptionId },
-    });
-    const data = await response.json();
-    const result = data?.data?.appSubscriptionCancel;
-    if (result?.userErrors?.length) {
-        throw new Error(result.userErrors[0].message);
-    }
-    return result?.appSubscription;
+  const response = await admin.graphql(SUBSCRIPTION_CANCEL, {
+    variables: { id: subscriptionId },
+  });
+  const data = await response.json();
+  const result = data?.data?.appSubscriptionCancel;
+  if (result?.userErrors?.length) {
+    throw new Error(result.userErrors[0].message);
+  }
+  return result?.appSubscription;
 }

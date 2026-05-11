@@ -118,8 +118,19 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // Update badge with wishlist count
-  if (customerId) {
-    fetch(proxyUrl + "/api/wishlist?shop=" + encodeURIComponent(shop) + "&customerId=" + encodeURIComponent(customerId) + "&action=count")
+  // Check plan — disable icon if no active plan
+  fetch(proxyUrl + "/api/wishlist?shop=" + encodeURIComponent(shop) + "&customerId=_&action=plan")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.plan || data.plan === "none") {
+        link.style.opacity = "0.35";
+        link.style.cursor = "not-allowed";
+        link.style.pointerEvents = "none";
+        return;
+      }
+      // Update badge with wishlist count
+      if (customerId) {
+        fetch(proxyUrl + "/api/wishlist?shop=" + encodeURIComponent(shop) + "&customerId=" + encodeURIComponent(customerId) + "&action=count")
       .then(function(r) { return r.json(); })
       .then(function(data) {
         var badge = document.getElementById("wl-hdr-badge");
@@ -128,8 +139,10 @@ document.addEventListener("DOMContentLoaded", function() {
           badge.style.display = "block";
         }
       })
-      .catch(function() {});
-  }
+    .catch(function() {});
+      }
+    })
+    .catch(function() {});
 });
 </script>
 

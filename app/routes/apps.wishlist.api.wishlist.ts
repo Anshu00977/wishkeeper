@@ -20,13 +20,14 @@ const cors = {
 };
 
 const PLAN_LIMITS: Record<string, number> = {
-  free: 10,
+  basic: 200,
   pro: Infinity,
 };
 
+
 async function getShopPlan(shop: string): Promise<string> {
   const shopPlan = await prisma.shopPlan.findUnique({ where: { shop } });
-  return shopPlan?.plan ?? "free";
+  return shopPlan?.plan ?? "none";
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -98,15 +99,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         const plan = await getShopPlan(shop);
         const limit = PLAN_LIMITS[plan] ?? 10;
 
-        if (limit !== Infinity && wishlistId) {
-          const currentCount = await getWishlistItemCount(wishlistId);
+        if (limit !== Infinity) {
+          const currentCount = await getWishlistCount(store.id, customerId);
+          console.log("plan:", plan, "limit:", limit, "currentCount:", currentCount);
           if (currentCount >= limit) {
             return json(
               {
                 error: "limit_reached",
                 limit,
                 plan,
-                message: `You've reached the ${limit} item limit. Upgrade to Pro for unlimited items.`,
+                message: `Your plan can keep only ${limit} products in the wishlist. Please coordinate with the store owner for any help.`,
               },
               { status: 403, headers: cors }
             );
