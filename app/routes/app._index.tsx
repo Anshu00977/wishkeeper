@@ -1,30 +1,30 @@
 import { useState } from "react";
 import type { LoaderFunctionArgs } from "react-router";
+import { data } from "react-router";
 import { useLoaderData, useNavigate } from "react-router";
-import { Page, Modal } from "@shopify/polaris";
+import { getActiveSubscription } from "../services/billing.server";
+import { Page } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
-import { findOrCreateStore, getAnalytics, getStoreSettingsByShop, updateStoreSettings } from "../services/wishlist.server";
+import { findOrCreateStore, getAnalytics } from "../services/wishlist.server";
 import dashboardStyles from "../styles/dashboard.css?url";
 
 export const links = () => [{ rel: "stylesheet", href: dashboardStyles }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
   const store = await findOrCreateStore(session.shop, session.accessToken!);
   const analytics = await getAnalytics(store.id);
-  return { shop: session.shop, analytics };
+  const subscription = await getActiveSubscription(admin);
+  const hasActivePlan = !!subscription;
+  return data({ shop: session.shop, analytics, hasActivePlan });
 };
 
-// ── Sparkline ─────────────────────────────────────────────────────────────
 function Sparkline({ color, data }: { color: string; data: number[] }) {
-  const w = 70;
-  const h = 30;
+  const w = 70, h = 30;
   const max = Math.max(...data, 1);
   const safeLen = Math.max(data.length - 1, 1);
-  const pts = data
-    .map((v, i) => `${(i / safeLen) * w},${h - (v / max) * (h - 4) - 2}`)
-    .join(" ");
+  const pts = data.map((v, i) => `${(i / safeLen) * w},${h - (v / max) * (h - 4) - 2}`).join(" ");
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none" style={{ display: "block" }}>
       <polyline points={pts} stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
@@ -32,7 +32,6 @@ function Sparkline({ color, data }: { color: string; data: number[] }) {
   );
 }
 
-// ── Line Chart ─────────────────────────────────────────────────────────────
 function LineChart({ data }: { data: { date: string; count: number }[] }) {
   const W = 560, H = 210, padL = 38, padR = 18, padT = 18, padB = 42;
   const max = Math.max(...data.map((d) => d.count), 1);
@@ -41,7 +40,6 @@ function LineChart({ data }: { data: { date: string; count: number }[] }) {
   const toY = (v: number) => padT + (1 - v / max) * (H - padT - padB);
   const pts = data.map((d, i) => `${toX(i)},${toY(d.count)}`).join(" ");
   const areaPath = `M${toX(0)},${H - padB} ` + data.map((d, i) => `L${toX(i)},${toY(d.count)}`).join(" ") + ` L${toX(data.length - 1)},${H - padB} Z`;
-
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }} xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -73,7 +71,6 @@ function LineChart({ data }: { data: { date: string; count: number }[] }) {
   );
 }
 
-// ── Stat Card ──────────────────────────────────────────────────────────────
 function StatCard({ title, value, icon, iconBg, sparkColor, sparkData, footer, footerIcon, footerIconBg }: any) {
   return (
     <div className="dash-stat-card">
@@ -92,7 +89,6 @@ function StatCard({ title, value, icon, iconBg, sparkColor, sparkData, footer, f
   );
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────
 const IconItems = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#7c5cfc" strokeWidth="1.8" /><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#7c5cfc" strokeWidth="1.8" /><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#7c5cfc" strokeWidth="1.8" /><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="#7c5cfc" strokeWidth="1.8" /></svg>);
 const IconHeart = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="#16a34a"><path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" /></svg>);
 const IconPeople = () => (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="1.8"><circle cx="9" cy="7" r="3" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M16 3.13a4 4 0 010 7.75" strokeLinecap="round" /><path d="M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" /></svg>);
@@ -115,14 +111,40 @@ function TrophyIllustration() {
   );
 }
 
-// ── Main Page ──────────────────────────────────────────────────────────────
+function BillingModal({ open, onNavigate }: { open: boolean; onNavigate: () => void }) {
+  if (!open) return null;
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 99999, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.45)" }}>
+      <div style={{ background: "#fff", borderRadius: 16, padding: "32px 28px", maxWidth: 420, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", textAlign: "center" }}>
+        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#f9f1e1", border: "1.5px solid rgba(184,146,42,0.25)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#b8922a" strokeWidth="1.6" strokeLinecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>
+        </div>
+        <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1612", margin: "0 0 8px" }}>Subscribe to continue</p>
+       
+        <p style={{ fontSize: 13, color: "#6b6257", margin: "0 0 20px", lineHeight: 1.6 }}>You need an active plan to use this app. Plans start from <strong style={{ color: "#b8922a" }}>$9.99 / month</strong>.</p>
+        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 20 }}>
+          {["❤️ Wishlists", "📊 Analytics", "🎨 Customisation"].map((f) => (
+            <div key={f} style={{ padding: "7px 12px", background: "#faf8f4", border: "1px solid rgba(184,146,42,0.18)", borderRadius: 8, fontSize: 11, fontWeight: 500, color: "#6b6257" }}>{f}</div>
+          ))}
+        </div>
+        <button onClick={onNavigate} style={{ width: "100%", padding: "12px 24px", background: "#b8922a", color: "#fff", border: "none", borderRadius: 9, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
+          View Plans
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Index() {
-  const { analytics } = useLoaderData<typeof loader>();
+  const { analytics, hasActivePlan } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
+  const [modalOpen, setModalOpen] = useState(!hasActivePlan);
   const sparkData = analytics.dailyCounts.map((d: { count: number }) => d.count);
 
   return (
     <Page>
       <TitleBar title="Wishlist Dashboard" />
+      <BillingModal open={modalOpen} onNavigate={() => navigate("/app/billing")} />
       <div className="dash-root">
         <div className="dash-header">
           <div className="dash-header__left">
@@ -134,14 +156,12 @@ export default function Index() {
             Live · updated just now
           </div>
         </div>
-
         <div className="dash-stats-grid">
           <StatCard title="Total Wishlist Items" value={analytics.totalItems} icon={<IconItems />} iconBg="#ede9fe" sparkColor="#7c5cfc" sparkData={sparkData} footer="All-time items saved" footerIcon={IconTrendUp("#7c5cfc")} footerIconBg="rgba(124,92,252,0.08)" />
           <StatCard title="Active Wishlists" value={analytics.totalWishlists} icon={<IconHeart />} iconBg="#dcfce7" sparkColor="#16a34a" sparkData={sparkData} footer="Customer lists created" footerIcon={IconTrendUp("#16a34a")} footerIconBg="rgba(22,163,74,0.08)" />
           <StatCard title="Unique Customers" value={analytics.totalCustomers} icon={<IconPeople />} iconBg="#dbeafe" sparkColor="#2563eb" sparkData={sparkData} footer="Shoppers with saved items" footerIcon={IconTrendUp("#2563eb")} footerIconBg="rgba(37,99,235,0.08)" />
           <StatCard title="Items Added (7d)" value={analytics.recentItems} icon={<IconBag />} iconBg="#fef3c7" sparkColor="#d97706" sparkData={sparkData} footer="Added this week" footerIcon={IconTrendUp("#d97706")} footerIconBg="rgba(217,119,6,0.08)" />
         </div>
-
         <div className="dash-bottom-row">
           <div className="dash-panel">
             <div className="dash-panel__header">
@@ -159,7 +179,6 @@ export default function Index() {
               <path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z" fill="#b8922a" />
             </svg>
           </div>
-
           <div className="dash-panel">
             <div className="dash-panel__header">
               <span className="dash-panel__title">

@@ -1,0 +1,474 @@
+/* ── Google Font Import ───────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Shared Variables ─────────────────────────────────────────────────────── */
+:root {
+    --gold: #b8922a;
+    --gold-light: #d4a843;
+    --gold-pale: #f9f1e1;
+    --gold-border: rgba(184, 146, 42, 0.22);
+    --gold-bg: rgba(184, 146, 42, 0.08);
+
+    --cream: #faf8f4;
+    --white: #ffffff;
+    --surface-2: #f5f3ef;
+    --border: rgba(0, 0, 0, 0.07);
+    --border-soft: rgba(0, 0, 0, 0.04);
+
+    --text-primary: #1a1612;
+    --text-secondary: #6b6257;
+    --text-muted: #a39a8e;
+
+    --green: #16a34a;
+    --green-bg: rgba(22, 163, 74, 0.08);
+    --green-border: rgba(22, 163, 74, 0.2);
+
+    --radius: 14px;
+    --radius-sm: 9px;
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+.st-root {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-family: 'DM Sans', sans-serif;
+    padding-bottom: 48px;
+}
+
+/* ── Page Header ──────────────────────────────────────────────────────────── */
+.st-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+    animation: stFadeUp 0.45s ease both;
+}
+
+.st-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    border-radius: 4px 0 0 4px;
+}
+
+.st-header__left {
+    padding-left: 8px;
+}
+
+.st-header__eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+}
+
+.st-header__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.1;
+}
+
+.st-header__title em {
+    font-style: italic;
+    color: var(--gold);
+}
+
+.st-header__sub {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ── Success Banner ───────────────────────────────────────────────────────── */
+.st-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green);
+    animation: stFadeUp 0.4s ease both;
+}
+
+.st-banner__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(22, 163, 74, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Settings Grid ────────────────────────────────────────────────────────── */
+.st-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    animation: stFadeUp 0.45s ease 0.1s both;
+}
+
+/* ── Section Card ─────────────────────────────────────────────────────────── */
+.st-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.st-card__head {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--cream);
+}
+
+.st-card__head-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.st-card__icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--gold-bg);
+    border: 1px solid var(--gold-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.st-card__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.st-card__desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+    padding-left: 42px;
+}
+
+.st-card__body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* ── Toggle Row ───────────────────────────────────────────────────────────── */
+.st-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    transition: background 0.18s;
+    cursor: pointer;
+    gap: 12px;
+}
+
+.st-toggle-row:hover {
+    background: var(--cream);
+}
+
+.st-toggle-row__label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.st-toggle-row__hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ── Custom Toggle Switch ─────────────────────────────────────────────────── */
+.st-toggle {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.st-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.st-toggle__track {
+    position: absolute;
+    inset: 0;
+    border-radius: 11px;
+    background: #e5e0d8;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transition: background 0.22s ease, border-color 0.22s ease;
+    cursor: pointer;
+}
+
+.st-toggle input:checked+.st-toggle__track {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.st-toggle__thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+    transition: transform 0.22s ease;
+    pointer-events: none;
+}
+
+.st-toggle input:checked~.st-toggle__thumb {
+    transform: translateX(16px);
+}
+
+/* ── Divider ──────────────────────────────────────────────────────────────── */
+.st-divider {
+    height: 1px;
+    background: var(--border-soft);
+    margin: 6px 0;
+}
+
+/* ── Field Row ────────────────────────────────────────────────────────────── */
+.st-field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 4px 0;
+}
+
+.st-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.st-field__label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.st-field__select,
+.st-field__input {
+    width: 100%;
+    height: 38px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.st-field__select:focus,
+.st-field__input:focus {
+    border-color: var(--gold-border);
+    box-shadow: 0 0 0 3px rgba(184, 146, 42, 0.10);
+}
+
+/* Select arrow */
+.st-field__select-wrap {
+    position: relative;
+}
+
+.st-field__select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--text-muted);
+    pointer-events: none;
+}
+
+/* Color picker row */
+.st-color-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.st-color-row .st-field__input {
+    flex: 1;
+}
+
+.st-color-swatch {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.st-color-swatch input[type="color"] {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    opacity: 0;
+    cursor: pointer;
+    border: none;
+}
+
+.st-color-swatch:hover {
+    box-shadow: 0 0 0 3px rgba(184, 146, 42, 0.15);
+}
+
+/* ── Icon Picker ──────────────────────────────────────────────────────────── */
+.st-icon-picker {
+    display: flex;
+    gap: 10px;
+    padding: 4px 0;
+}
+
+.st-icon-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--cream);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.st-icon-option:hover {
+    border-color: var(--gold-border);
+    color: var(--gold);
+}
+
+.st-icon-option.active {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+    color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(184, 146, 42, 0.10);
+}
+
+.st-icon-option svg {
+    flex-shrink: 0;
+}
+
+/* ── Save Bar ─────────────────────────────────────────────────────────────── */
+.st-save-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    animation: stFadeUp 0.45s ease 0.2s both;
+}
+
+.st-save-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(184, 146, 42, 0.30);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+    letter-spacing: 0.02em;
+}
+
+.st-save-btn:hover {
+    background: var(--gold-light);
+    box-shadow: 0 4px 16px rgba(184, 146, 42, 0.35);
+    transform: translateY(-1px);
+}
+
+.st-save-btn:active {
+    transform: translateY(0);
+}
+
+.st-save-btn:disabled {
+    opacity: 0.65;
+    cursor: default;
+    transform: none;
+}
+
+.st-save-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ── Animation ────────────────────────────────────────────────────────────── */
+@keyframes stFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

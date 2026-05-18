@@ -74,6 +74,10 @@ export async function getStoreSettingsByShop(shop: string) {
   return prisma.storeSettings.findUnique({ where: { storeId: store.id } });
 }
 
+export async function getStoreSettings(storeId: string) {
+  return prisma.storeSettings.findUnique({ where: { storeId } });
+}
+
 export async function updateStoreSettings(
   storeId: string,
   data: {
