@@ -1,0 +1,62 @@
+{% comment %}
+  Wishlist Collection Hearts — App Embed Block
+{% endcomment %}
+
+{% if block.settings.enabled %}
+
+<link rel="stylesheet" href="{{ 'wishlist-collection.css' | asset_url }}">
+
+<script>
+  window.__wlCollectionConfig = {
+    shop: {{ shop.permanent_domain | json }},
+    proxyUrl: {{ shop.url | json }} + "/apps/wishlist",
+    customerId: {{ customer.id | json }},
+    activeColor: {{ block.settings.active_color | json }},
+    iconStyle: {{ block.settings.icon_style | json }},
+    iconSize: {{ block.settings.icon_size }}
+  };
+</script>
+<script src="{{ 'wishlist-collection.js' | asset_url }}" defer></script>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "Wishlist (Collections)",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable wishlist hearts on product cards",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "icon_style",
+      "label": "Icon style",
+      "options": [
+        { "value": "heart", "label": "Heart" },
+        { "value": "bookmark", "label": "Bookmark" },
+        { "value": "star", "label": "Star" }
+      ],
+      "default": "heart"
+    },
+    {
+      "type": "color",
+      "id": "active_color",
+      "label": "Active color",
+      "default": "#e74c6f"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size (px)",
+      "min": 28,
+      "max": 48,
+      "step": 2,
+      "default": 36
+    }
+  ]
+}
+{% endschema %}

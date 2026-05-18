@@ -1,0 +1,368 @@
+/* ── Google Font Import ───────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Shared Variables (same as dashboard) ─────────────────────────────────── */
+:root {
+    --gold: #b8922a;
+    --gold-light: #d4a843;
+    --gold-pale: #f9f1e1;
+    --gold-border: rgba(184, 146, 42, 0.22);
+    --gold-bg: rgba(184, 146, 42, 0.08);
+
+    --cream: #faf8f4;
+    --white: #ffffff;
+    --surface-2: #f5f3ef;
+    --border: rgba(0, 0, 0, 0.07);
+    --border-soft: rgba(0, 0, 0, 0.04);
+
+    --text-primary: #1a1612;
+    --text-secondary: #6b6257;
+    --text-muted: #a39a8e;
+
+    --radius: 14px;
+    --radius-sm: 9px;
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+.wl-root {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-family: 'DM Sans', sans-serif;
+    padding-bottom: 40px;
+}
+
+/* ── Page Header (same style as dashboard) ────────────────────────────────── */
+.wl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+    animation: wlFadeUp 0.5s ease both;
+}
+
+.wl-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--gold-light), var(--gold));
+    border-radius: 4px 0 0 4px;
+}
+
+.wl-header__left {
+    padding-left: 8px;
+}
+
+.wl-header__eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+}
+
+.wl-header__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.1;
+}
+
+.wl-header__title em {
+    font-style: italic;
+    color: var(--gold);
+}
+
+.wl-header__right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.wl-header__count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.wl-header__count-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gold);
+}
+
+/* ── Table Card ───────────────────────────────────────────────────────────── */
+.wl-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    animation: wlFadeUp 0.5s ease 0.1s both;
+}
+
+/* ── Table ────────────────────────────────────────────────────────────────── */
+.wl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Head */
+.wl-table__head {
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+}
+
+.wl-table__head th {
+    padding: 13px 20px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.wl-table__head th:first-child {
+    padding-left: 24px;
+}
+
+.wl-table__head th:last-child {
+    padding-right: 24px;
+    text-align: right;
+}
+
+/* Body rows */
+.wl-table__row {
+    border-bottom: 1px solid var(--border-soft);
+    transition: background 0.18s ease;
+    cursor: default;
+}
+
+.wl-table__row:last-child {
+    border-bottom: none;
+}
+
+.wl-table__row:hover {
+    background: var(--cream);
+}
+
+.wl-table__row td {
+    padding: 14px 20px;
+    vertical-align: middle;
+}
+
+.wl-table__row td:first-child {
+    padding-left: 24px;
+}
+
+.wl-table__row td:last-child {
+    padding-right: 24px;
+    text-align: right;
+}
+
+/* ── Customer cell ────────────────────────────────────────────────────────── */
+.wl-customer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wl-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gold-bg);
+    border: 1px solid var(--gold-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.wl-avatar--guest {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.2);
+    color: #6366f1;
+}
+
+.wl-customer__name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+/* ── Badges ───────────────────────────────────────────────────────────────── */
+.wl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border-radius: 20px;
+    padding: 3px 11px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.wl-badge--guest {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    color: #6366f1;
+}
+
+.wl-badge--items {
+    background: var(--gold-bg);
+    border: 1px solid var(--gold-border);
+    color: var(--gold);
+}
+
+.wl-badge--zero {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+/* ── Name cell ────────────────────────────────────────────────────────────── */
+.wl-name {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* ── Date cell ────────────────────────────────────────────────────────────── */
+.wl-date {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* ── Pagination ───────────────────────────────────────────────────────────── */
+.wl-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 20px;
+    animation: wlFadeUp 0.5s ease 0.2s both;
+}
+
+.wl-pagination__btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    box-shadow: var(--shadow-card);
+    transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.wl-pagination__btn:hover:not(:disabled) {
+    border-color: var(--gold-border);
+    color: var(--gold);
+    box-shadow: var(--shadow-hover);
+}
+
+.wl-pagination__btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.wl-pagination__info {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 0 8px;
+}
+
+.wl-pagination__info span {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* ── Empty State ──────────────────────────────────────────────────────────── */
+.wl-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 64px 24px;
+    text-align: center;
+}
+
+.wl-empty__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--gold-pale);
+    border: 1px solid var(--gold-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wl-empty__title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.wl-empty__sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 280px;
+    margin: 0;
+}
+
+/* ── Animation ────────────────────────────────────────────────────────────── */
+@keyframes wlFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

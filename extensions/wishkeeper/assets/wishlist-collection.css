@@ -1,0 +1,56 @@
+.wl-heart-wrap {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 9999;
+  pointer-events: auto !important;
+}
+
+.wl-heart-btn {
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  border-radius: 50%;
+  cursor: pointer !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  padding: 0;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 9999;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wl-heart-btn:hover {
+  background: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.wl-heart-btn.active svg {
+  animation: wl-heart-pop 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.wl-heart-btn.loading {
+  opacity: 0.5;
+  pointer-events: none !important;
+}
+
+@keyframes wl-heart-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.product-card-wrapper,
+.grid__item .card-wrapper,
+.collection-product-card,
+.grid-product,
+.product-card,
+.card--product,
+.product-item {
+  position: relative !important;
+}

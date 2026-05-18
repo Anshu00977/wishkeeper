@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+  enabledApiClients   String?
+}
+
+model Store {
+  id            String         @id @default(uuid())
+  shop          String         @unique
+  installedAt   DateTime       @default(now())
+  uninstalledAt DateTime?
+  isActive      Boolean        @default(true)
+  wishlists     Wishlist[]
+  settings      StoreSettings?
+}
+
+model StoreSettings {
+  id                String  @id @default(uuid())
+  storeId           String  @unique
+  store             Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  showShareButton   Boolean @default(true)
+  showItemCount     Boolean @default(true)
+  maxItemsPerList   Int     @default(50)
+  showTitle         Boolean @default(true)
+  showPrice         Boolean @default(true)
+  showAddToCart     Boolean @default(true)
+  showVendor        Boolean @default(false)
+  gridColumns       Int     @default(4)
+  iconStyle         String  @default("heart")
+  activeColor       String  @default("#e74c6f")
+  headerIconEnabled Boolean @default(true)
+  storefrontToken   String?
+}
+
+model Wishlist {
+  id         String         @id @default(uuid())
+  storeId    String
+  store      Store          @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  customerId String
+  name       String         @default("My Wishlist")
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  items      WishlistItem[]
+
+  @@unique([storeId, customerId, name])
+  @@index([storeId, customerId])
+}
+
+model WishlistItem {
+  id         String   @id @default(uuid())
+  wishlistId String
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
+  productId  String
+  variantId  String?
+  addedAt    DateTime @default(now())
+
+  @@unique([wishlistId, productId, variantId])
+  @@index([wishlistId])
+}
+
+model ShopPlan {
+  id               Int       @id @default(autoincrement())
+  shop             String    @unique
+  plan             String    @default("free")
+  subscriptionId   String?
+  status           String    @default("active")
+  trialEndsAt      DateTime?
+  billingStartedAt DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([shop])
+}

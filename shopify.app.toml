@@ -1,0 +1,36 @@
+name = "Wishkeeper Backup"
+client_id = "a0032733c2a179b99f867dafa839c96e"
+application_url = "https://consent-inspired-renewable-benjamin.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+
+[webhooks]
+api_version = "2026-07"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+[access_scopes]
+scopes = "write_metaobject_definitions,write_metaobjects,write_products,unauthenticated_read_product_listings,read_customers"
+optional_scopes = [ ]
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [
+  "https://consent-inspired-renewable-benjamin.trycloudflare.com/auth/callback"
+]
+
+[app_proxy]
+url = "https://consent-inspired-renewable-benjamin.trycloudflare.com"
+subpath = "wishlist"
+prefix = "apps"
+
+[pos]
+embedded = false
