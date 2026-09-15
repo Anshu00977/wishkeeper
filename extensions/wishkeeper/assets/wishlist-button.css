@@ -1,0 +1,93 @@
+.wl-btn-wrapper {
+  --wl-active: #e74c6f;
+  visibility: hidden;
+}
+
+.wl-btn-wrapper.wl-btn-wrapper--ready {
+  visibility: visible;
+}
+
+.wl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  position: relative;
+}
+
+/* ─── Full button style ─── */
+.wl-btn--full {
+  padding: 11px 24px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  width: 100%;
+}
+
+.wl-btn--full:hover {
+  border-color: var(--wl-active);
+  color: var(--wl-active);
+}
+
+.wl-btn--full.active {
+  background: color-mix(in srgb, var(--wl-active) 8%, transparent);
+  border-color: var(--wl-active);
+  color: var(--wl-active);
+}
+
+/* ─── Icon only style ─── */
+.wl-btn--icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #9ca3af;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.wl-btn--icon:hover {
+  color: var(--wl-active);
+  border-color: var(--wl-active);
+  background: color-mix(in srgb, var(--wl-active) 6%, white);
+}
+
+.wl-btn--icon.active {
+  color: var(--wl-active);
+  background: color-mix(in srgb, var(--wl-active) 10%, white);
+  border-color: var(--wl-active);
+}
+
+/* ─── Shared ─── */
+.wl-btn.active .wl-btn-svg {
+  fill: var(--wl-active);
+  stroke: var(--wl-active);
+}
+
+.wl-btn.loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.wl-btn-svg {
+  transition: fill 0.2s, stroke 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.wl-btn.active .wl-btn-svg {
+  animation: wl-pop 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes wl-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+

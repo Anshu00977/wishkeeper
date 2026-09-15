@@ -1,0 +1,50 @@
+{% comment %}
+  Wishlist Header Icon — App Embed Block
+{% endcomment %}
+
+{% if block.settings.enabled %}
+
+<script>
+  window.__wlHeaderConfig = {
+    shop: {{ shop.permanent_domain | json }},
+    proxyUrl: {{ shop.url | json }} + "/apps/wishlist",
+    customerId: {{ customer.id | json }},
+    activeColor: {{ block.settings.active_color | json }},
+    iconStyle: {{ block.settings.icon_style | json }}
+  };
+</script>
+<script src="{{ 'wishlist-header.js' | asset_url }}" defer></script>
+
+{% endif %}
+
+{% schema %}
+{
+  "name": "Wishlist Icon",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable wishlist icon in header",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "icon_style",
+      "label": "Icon style",
+      "options": [
+        { "value": "heart", "label": "Heart" },
+        { "value": "bookmark", "label": "Bookmark" },
+        { "value": "star", "label": "Star" }
+      ],
+      "default": "heart"
+    },
+    {
+      "type": "color",
+      "id": "active_color",
+      "label": "Badge color",
+      "default": "#e74c6f"
+    }
+  ]
+}
+{% endschema %}

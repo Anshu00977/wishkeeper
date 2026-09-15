@@ -1,0 +1,1 @@
+export { loader, action } from "./apps.wishlist.api.wishlist";
